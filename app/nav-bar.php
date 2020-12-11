@@ -29,8 +29,8 @@ echo '<div class="topbar stick">
                 <!-- <img src="{userimageurl}" alt=""> -->
 				<div class="user-setting">
 					<a href="time-line.php"><i class="ti-user"></i> view profile</a>
-					<a href="#" title=""><i class="ti-pencil-alt"></i>edit profile</a>
-					<a href="#" title=""><i class="ti-settings"></i>account setting</a>
+					<a href="edit-profile-basic.php" title=""><i class="ti-pencil-alt"></i>edit profile</a>
+					<a href="setting.php" title=""><i class="ti-settings"></i>account setting</a>
 					<a href="#" title=""><i class="ti-power-off"></i>log out</a>
 				</div>
 			</div>
