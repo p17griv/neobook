@@ -691,7 +691,6 @@ header.sticky {
 }
 
 .top-area .user-img {
-    cursor: pointer;
     display: inline-block;
     vertical-align: middle;
     position: relative;
@@ -1212,7 +1211,6 @@ header.sticky {
 
 .sidebar .widget li > a {
     font-size: 15px;
-    text-transform: capitalize;
     display: inline-block;
     position: relative;
     font-weight: 500;
