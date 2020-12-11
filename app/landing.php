@@ -36,7 +36,7 @@
 					<div class="log-reg-area sign">
 						<h2 class="log-title">Login</h2>
 							<p>
-								Don’t use Winku Yet? <a href="#" title="">Take the tour</a> or <a href="#" title="">Join now</a>
+								Ready to return? Your followers are missing you!
 							</p>
 						<form method="post">
 							<div class="form-group">	
@@ -47,12 +47,6 @@
 							  <input type="password" required="required"/>
 							  <label class="control-label" for="input">Password</label><i class="mtrl-select"></i>
 							</div>
-							<div class="checkbox">
-							  <label>
-								<input type="checkbox" checked="checked"/><i class="check-box"></i>Always Remember Me.
-							  </label>
-							</div>
-							<a href="#" title="" class="forgot-pwd">Forgot Password?</a>
 							<div class="submit-btns">
 								<button class="mtr-btn signin" type="button"><span>Login</span></button>
 								<button class="mtr-btn signup" type="button"><span>Register</span></button>
@@ -62,16 +56,12 @@
 					<div class="log-reg-area reg">
 						<h2 class="log-title">Register</h2>
 							<p>
-								Don’t use Winku Yet? <a href="#" title="">Take the tour</a> or <a href="#" title="">Join now</a>
+								A whole new world is waiting for your content!
 							</p>
 						<form method="post">
 							<div class="form-group">	
 							  <input type="text" required="required"/>
 							  <label class="control-label" for="input">First & Last Name</label><i class="mtrl-select"></i>
-							</div>
-							<div class="form-group">	
-							  <input type="text" required="required"/>
-							  <label class="control-label" for="input">User Name</label><i class="mtrl-select"></i>
 							</div>
 							<div class="form-group">	
 							  <input type="password" required="required"/>
@@ -91,11 +81,53 @@
 							</div>
 							<div class="form-group">	
 							  <input type="text" required="required"/>
-							  <label class="control-label" for="input"><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6c29010d05002c">[email&#160;protected]</a></label><i class="mtrl-select"></i>
+							  <label class="control-label" for="input">Email</label><i class="mtrl-select"></i>
 							</div>
+                            <div class="dob">
+                                <div class="form-group">
+                                    <h6>Birth Date: </h6>
+                                    <select>
+                                        <option value="Day">Day</option>
+                                        <?php
+                                        for($i=1; $i<=31; $i++)
+                                        {
+                                            echo'<option>'.$i.'</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <select>
+                                        <option value="month">Month</option>
+                                        <option>Jan</option>
+                                        <option>Feb</option>
+                                        <option>Mar</option>
+                                        <option>Apr</option>
+                                        <option>May</option>
+                                        <option>Jun</option>
+                                        <option>Jul</option>
+                                        <option>Aug</option>
+                                        <option>Sep</option>
+                                        <option>Oct</option>
+                                        <option>Nov</option>
+                                        <option>Dec</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <select>
+                                        <option value="year">Year</option>
+                                        <?php
+                                        for($i=date("Y")-17; $i>=1900; $i--)
+                                        {
+                                            echo'<option>'.$i.'</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
 							<div class="checkbox">
 							  <label>
-								<input type="checkbox" checked="checked"/><i class="check-box"></i>Accept Terms & Conditions ?
+								<input type="checkbox" required="required"/><i class="check-box"></i>Accept Terms & Conditions ?
 							  </label>
 							</div>
 							<a href="#" title="" class="already-have">Already have an account</a>
