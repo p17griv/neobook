@@ -96,7 +96,7 @@
 													<select>
 													  <option value="year">{userbirthyear}</option>
                                                         <?php
-                                                        for($i=date("Y")-17; $i>=1900; $i--)
+                                                        for($i=date("Y")-18; $i>=1900; $i--)
                                                         {
                                                             echo'<option>'.$i.'</option>';
                                                         }
