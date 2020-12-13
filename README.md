@@ -5,8 +5,8 @@ A simple social network that uses a Neo4j graph database!
 ### Sources
 Title | Url | Notes
 ------------ | ------------- | -------------
-LiveJournal social network | http://snap.stanford.edu/data/soc-LiveJournal1.html | Contains 68,993,773 relationships  between 4,847,571 users
-World Cities | https://www.kaggle.com/okfn/world-cities | Neo4j Basics
+Slashdot social network | http://snap.stanford.edu/data/soc-Slashdot0902.html | Contains 948,464 relationships  between 82,168 users
+World Cities |	https://www.kaggle.com/okfn/world-cities |	Contains cities and countries
 
 
 ### Documentation
