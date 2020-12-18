@@ -1,18 +1,16 @@
-# from neo4j import GraphDatabase GG
+from connect_to_db import ini_conn_with_neo4j
 import names
 import random
 import datetime
 import time
-import urllib.request
-from urllib.request import Request
 
-'''
-def ini_conn_with_neo4j():
-    url = 'neo4j://localhost:7687'
-    username = 'testuser'
-    password = '123'
-    return GraphDatabase.driver(url, auth=(username, password))
-'''
+
+def create_user(tx, id, fn, gndr, phn, bD, eml, intrts, ct, ctr, lat, long, lng, prfimgurl):
+    cypher_query = "CREATE (:User { id: $id, password: $id, fullname: $fn, gender: $gndr, phone: $phn, birthDate: " \
+                   "$bD, email: $eml, interests: $intrts, city: $ct, country: $ctr, latitude: $lat, longitude: $long," \
+                   "languages: $lng, profileImageUrl: $prfimgurl }) "
+    tx.run(cypher_query, id=id, fn=fn, gndr=gndr, phn=phn, bD=bD, eml=eml, intrts=intrts, ct=ct, ctr=ctr, lat=lat,
+           long=long, lng=lng, prfimgurl=prfimgurl)
 
 
 def produce_name_gender():
@@ -66,11 +64,11 @@ def produce_interests():
 
 def produce_cities():
     while True:
-        random_row = random.choice(list(open('Data/world-cities.csv', encoding="utf8")))
+        random_row = random.choice(list(open('Data/worldcities.csv', encoding='utf8')))
         random_row = random_row.split(',')
-        if random_row[0] != 'name':
+        if random_row[0] != 'city':
             break
-    return random_row[0], random_row[1], random_row[3]
+    return random_row
 
 
 def produce_languages():
@@ -82,58 +80,51 @@ def produce_languages():
 
 
 def produce_profile_image_url(gnder):
-    #if gnder == 'male':
-        # req = Request('https://source.unsplash.com/featured/?man', headers={'User-Agent': 'Mozilla/5.0'})
-        # req = Request('https://loremflickr.com/800/600/man', headers={'User-Agent': 'Mozilla/5.0'})
-    #else:
-        # req = Request('https://source.unsplash.com/featured/?woman', headers={'User-Agent': 'Mozilla/5.0'})
-        # req = Request('https://loremflickr.com/800/600/woman', headers={'User-Agent': 'Mozilla/5.0'})
-    req = Request('https://picsum.photos/800/600', headers={'User-Agent': 'Mozilla/5.0'})
-    return urllib.request.urlopen(req).geturl()
+    if gnder == 'male':
+        return random.choice(list(open('Data/men_urls_unique.txt', encoding='utf8'))[1:])
+    else:
+        return random.choice(list(open('Data/women_urls_unique.txt', encoding='utf8'))[1:])
 
-
-'''
-def create_friend_of(tx, user1, user2):
-    tx.run("CREATE (a:Person {id: $userid1 name: $user2 gender:})-[:FOLLOWS]->(f:Post {id: " "text: " " name: $user2}) ", user1=user1, user2=user2)
-'''
 
 if __name__ == '__main__':
     start_time = time.time()
-    # driver = ini_conn_with_neo4j()
+    driver = ini_conn_with_neo4j()
 
-    for user in range(0, 40):
-        fullname = produce_name_gender()[0]
-        gender = produce_name_gender()[1]
-        phone = produce_phone_number()
-        birthDate = produce_birth_date()
-        email = produce_email(fullname, birthDate)
-        interests = produce_interests()
-        city = produce_cities()[0]
-        country = produce_cities()[1]
-        geonamecode = produce_cities()[2]
-        languages = produce_languages()
-        profileImageUrl = produce_profile_image_url(gender)
+    with driver.session() as session:
 
-        print(f'id: {user}\n'
-              f'fullname: {fullname}\n'
-              f'gender: {gender}\n'
-              f'phone: {phone}\n'
-              f'birthDate: {birthDate}\n'
-              f'email: {email}\n'
-              f'interests: {interests}\n'
-              f'city: {city}\n'
-              f'country: {country}\n'
-              f'geonamecode: {geonamecode}'
-              f'languages: {languages}\n'
-              f'profileImageUrl: {profileImageUrl}\n')
+        for user in range(0, 50):
+            fullname = produce_name_gender()[0]
+            gender = produce_name_gender()[1]
+            phone = produce_phone_number()
+            birthDate = produce_birth_date()
+            email = produce_email(fullname, birthDate)
+            interests = produce_interests()
+            random_place = produce_cities()
+            city = random_place[0]
+            country = random_place[4]
+            latitude = random_place[2]
+            longitude = random_place[3]
+            languages = produce_languages()
+            profileImageUrl = produce_profile_image_url(gender)
 
-    '''
-    print(f'{user1} follows --> {user2}')
-    print(
-        f'{name_gender_age_generator()[0], name_gender_age_generator()[2]} follows --> {name_gender_age_generator()[0], name_gender_age_generator()[2]}')
-    # with driver.session() as session:
-    # session.write_transaction(create_friend_of, user1, user2)
-    '''
+            session.write_transaction(create_user, user, fullname, gender, phone, birthDate, email, interests, city,
+                                      country, latitude, longitude, languages, profileImageUrl)
+            print(f'\rInserting user: {user}', end="", flush=True)
 
-    # driver.close()
-    print(f'Elapsed: {round((time.time() - start_time) / 60, 2)} minutes')
+            '''
+            print(f'id: {user}\n'
+                  f'fullname: {fullname}\n'
+                  f'gender: {gender}\n'
+                  f'phone: {phone}\n'
+                  f'birthDate: {birthDate}\n'
+                  f'email: {email}\n'
+                  f'interests: {interests}\n'
+                  f'city: {city}\n'
+                  f'country: {country}\n'
+                  f'lat: {latitude}\n'
+                  f'long: {longitude}\n'
+                  f'languages: {languages}\n'
+                  f'produce_profile_image_url: {profileImageUrl}')
+            '''
+    driver.close()
+    print(f'\nElapsed: {round((time.time() - start_time) / 60, 2)} minutes')
