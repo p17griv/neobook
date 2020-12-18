@@ -11,7 +11,7 @@ posts_text.txt | Facebook posts | https://github.com/minimaxir/interactive-faceb
 men_urls_unique.txt | Men images URLs | https://source.unsplash.com/featured/?man | Contains 1227 image URLs, with "man" keyword, collected from unsplash.com
 women_urls_unique.txt | Women images URLs | https://source.unsplash.com/featured/?woman | Contains 1998 image URLs, with "woman" keyword, collected from unsplash.com
 interests.txt | Interests and hobbies | - | Contains 307 interests and hobbies
-SBU_captioned_photo_dataset_urls.txt | http://www.cs.virginia.edu/~vicente/sbucaptions/ | Contains 1 million image URLs that point to public images on Flickr.
+SBU_captioned_photo_dataset_urls.txt | - | http://www.cs.virginia.edu/~vicente/sbucaptions/ | Contains 1 million image URLs that point to public images on Flickr.
 
 
 ### Documentation
