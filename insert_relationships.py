@@ -18,7 +18,6 @@ if __name__ == '__main__':
 
         for line in txt_file:
             lines_read += 1
-            print(f'\rInserting: {lines_read} relationships', end="", flush=True)
 
             if line[0] != '#':
                 user1 = line.split('\t')[0]
@@ -30,6 +29,7 @@ if __name__ == '__main__':
                 if int(user2) > 49:  # test mode
                     continue
 
+                print(f'\rInserting: {lines_read} relationships', end="", flush=True)
                 session.write_transaction(create_relationship_of, user1, user2)
                 # print(f'{user1} follows --> {user2}')
 

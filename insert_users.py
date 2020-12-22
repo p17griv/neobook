@@ -3,14 +3,15 @@ import names
 import random
 import datetime
 import time
+import hashlib
 
 
-def create_user(tx, id, fn, gndr, phn, bD, eml, intrts, ct, ctr, lat, long, lng, prfimgurl):
-    cypher_query = "CREATE (:User { id: $id, password: $id, fullname: $fn, gender: $gndr, phone: $phn, birthDate: " \
-                   "$bD, email: $eml, interests: $intrts, city: $ct, country: $ctr, latitude: $lat, longitude: $long," \
+def create_user(tx, id, pwd, fn, gndr, phn, bd, eml, intrts, ct, ctr, lat, long, lng, prfimgurl):
+    cypher_query = "CREATE (:User { id: $id, password: $pwd, fullname: $fn, gender: $gndr, phone: $phn, birthDate: " \
+                   "$bd, email: $eml, interests: $intrts, city: $ct, country: $ctr, latitude: $lat, longitude: $long," \
                    "languages: $lng, profileImageUrl: $prfimgurl }) "
-    tx.run(cypher_query, id=id, fn=fn, gndr=gndr, phn=phn, bD=bD, eml=eml, intrts=intrts, ct=ct, ctr=ctr, lat=lat,
-           long=long, lng=lng, prfimgurl=prfimgurl)
+    tx.run(cypher_query, id=id, pwd=pwd, fn=fn, gndr=gndr, phn=phn, bd=bd, eml=eml, intrts=intrts, ct=ct, ctr=ctr,
+           lat=lat, long=long, lng=lng, prfimgurl=prfimgurl)
 
 
 def produce_name_gender():
@@ -93,6 +94,7 @@ if __name__ == '__main__':
     with driver.session() as session:
 
         for user in range(0, 50):
+            password = hashlib.sha256(str(user).encode()).hexdigest()
             fullname = produce_name_gender()[0]
             gender = produce_name_gender()[1]
             phone = produce_phone_number()
@@ -107,12 +109,13 @@ if __name__ == '__main__':
             languages = produce_languages()
             profileImageUrl = produce_profile_image_url(gender)
 
-            session.write_transaction(create_user, user, fullname, gender, phone, birthDate, email, interests, city,
+            session.write_transaction(create_user, user, password, fullname, gender, phone, birthDate, email, interests, city,
                                       country, latitude, longitude, languages, profileImageUrl)
             print(f'\rInserting user: {user}', end="", flush=True)
 
             '''
             print(f'id: {user}\n'
+                  f'password: {password}\n'
                   f'fullname: {fullname}\n'
                   f'gender: {gender}\n'
                   f'phone: {phone}\n'

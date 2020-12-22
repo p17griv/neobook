@@ -11,19 +11,33 @@ echo '<section>
 				<div class="row merged">
 					<div class="col-lg-2 col-sm-3">
 						<div class="user-avatar">
-							<figure>
-								<img src="images/resources/user-avatar.jpg" alt="">
-								<!-- <img src="{userprofileimageurl}" alt=""> -->
-							</figure>
-						</div>
-					</div>
-					<div class="col-lg-10 col-sm-9">
-						<div class="timeline-info">
-							<ul>
-								<li class="admin-name">
-								  <h5>{userfullname}</h5>
-								  <span>{usercity, usercountry}</span>
-								</li>';
+							<figure>';
+
+if (isset($_Get['user'])) {
+    $query = "MATCH (u:User) WHERE u.id = " . $_Get["user"] . " RETURN u.profileImageUrl"; // Get current user's profile image url
+    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+    $profileImageUrl = $result->get('u.profileImageUrl'); // Get the image url
+
+    echo "<img style='width: 100%; height: 200px' src='" . $profileImageUrl . "'>";
+}
+else {
+    $query = "MATCH (u:User) WHERE u.id = " . $_COOKIE["user"] . " RETURN u.profileImageUrl,u.fullname, u.city, u.country"; // Get current user's profile image url
+    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+    echo "
+                                <img style='width: 100%; height: 200px' src='".$result->get('u.profileImageUrl'). "'>
+                            </figure>
+                            </div>
+                        </div>
+                        <div class='col-lg-10 col-sm-9'>
+                            <div class='timeline-info'>
+                                <ul>
+                                    <li class='admin-name'>
+                                      <h5>".$result->get('u.fullname')."</h5>
+                                      <span>".str_replace('"', '', $result->get('u.city')).", ".str_replace('"','',$result->get('u.country'))."</span>
+                                    </li>";
+}
+
     if(str_contains($_SERVER['REQUEST_URI'], 'time-line.php'))
     {
         echo '<li>

@@ -42,6 +42,8 @@ def produce_post_timestamp():
         day = '0' + str(day)
     if hour < 10:
         hour = '0' + str(hour)
+    if minute < 10:
+        minute = '0' + str(minute)
 
     return str(year) + '/' + str(month) + '/' + str(day) + ' ' + str(hour) + ':' + str(minute)
 

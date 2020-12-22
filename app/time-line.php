@@ -1,3 +1,10 @@
+<?php
+// Check if no one is logged in
+if(!isset($_COOKIE["user"])) {
+    header('Location: landing.php'); //Redirect to landing.php
+}
+include("connect_to_db.php");
+?>
 <!DOCTYPE html>
 <html lang="en">
 

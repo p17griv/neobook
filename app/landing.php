@@ -1,3 +1,11 @@
+<?php
+// Check if there is someone already logged in
+if(isset($_COOKIE["user"])) {
+    header('Location: index.php'); // Redirect to index.php
+}
+
+include("connect_to_db.php");
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,111 +46,45 @@
 							<p>
 								Ready to return? Your followers are missing you!
 							</p>
-						<form method="post">
+						<form method="post" action="landing.php" >
 							<div class="form-group">	
-							  <input type="text" id="input" required="required"/>
+							  <input type="text" required="required" name="username"/>
 							  <label class="control-label" for="input">Username</label><i class="mtrl-select"></i>
 							</div>
 							<div class="form-group">	
-							  <input type="password" required="required"/>
+							  <input type="password" required="required" name="password"/>
 							  <label class="control-label" for="input">Password</label><i class="mtrl-select"></i>
 							</div>
 							<div class="submit-btns">
-								<button class="mtr-btn signin" type="button"><span>Login</span></button>
-								<button class="mtr-btn signup" type="button"><span>Register</span></button>
+								<button class="mtr-btn signin" type="submit"><span>Login</span></button>
+                                <a href="register.php"><button class="mtr-btn" type="button"><span>Register</span></button></a>
 							</div>
+                            <?php
+                            if(isset($_POST["username"], $_POST["password"])) {
+                                $query = 'MATCH (u:User) WHERE u.id = '.$_POST['username'].' RETURN u.password'; // Get the password for the given username (id)
+                                $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                $pwd = $result->get('u.password'); // Get the password
+                                $hashed_pass = hash('sha256', $_POST["password"]); // Has the given password
+
+                                // Check if given password (hash) value is equal to the password stored in db
+                                if ($hashed_pass == $pwd) {
+                                    setcookie("user", $_POST['username'], time() + (86400 * 30), "/"); // Create a cookie with user's id
+                                    header('Location: index.php'); // Redirect to index.php
+                                }
+                                else {
+                                    echo "<br><br><p style='color: red'>Wrong Username or Password</p>";
+                                }
+                            }
+                            ?>
 						</form>
 					</div>
-					<div class="log-reg-area reg">
-						<h2 class="log-title">Register</h2>
-							<p>
-								A whole new world is waiting for your content!
-							</p>
-						<form method="post">
-							<div class="form-group">	
-							  <input type="text" required="required"/>
-							  <label class="control-label" for="input">First & Last Name</label><i class="mtrl-select"></i>
-							</div>
-							<div class="form-group">	
-							  <input type="password" required="required"/>
-							  <label class="control-label" for="input">Password</label><i class="mtrl-select"></i>
-							</div>
-							<div class="form-radio">
-							  <div class="radio">
-								<label>
-								  <input type="radio" name="radio" checked="checked"/><i class="check-box"></i>Male
-								</label>
-							  </div>
-							  <div class="radio">
-								<label>
-								  <input type="radio" name="radio"/><i class="check-box"></i>Female
-								</label>
-							  </div>
-							</div>
-							<div class="form-group">	
-							  <input type="text" required="required"/>
-							  <label class="control-label" for="input">Email</label><i class="mtrl-select"></i>
-							</div>
-                            <div class="dob">
-                                <div class="form-group">
-                                    <h6>Birth Date: </h6>
-                                    <select>
-                                        <option value="Day">Day</option>
-                                        <?php
-                                        for($i=1; $i<=31; $i++)
-                                        {
-                                            echo'<option>'.$i.'</option>';
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <select>
-                                        <option value="month">Month</option>
-                                        <option>Jan</option>
-                                        <option>Feb</option>
-                                        <option>Mar</option>
-                                        <option>Apr</option>
-                                        <option>May</option>
-                                        <option>Jun</option>
-                                        <option>Jul</option>
-                                        <option>Aug</option>
-                                        <option>Sep</option>
-                                        <option>Oct</option>
-                                        <option>Nov</option>
-                                        <option>Dec</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <select>
-                                        <option value="year">Year</option>
-                                        <?php
-                                        for($i=date("Y")-18; $i>=1900; $i--)
-                                        {
-                                            echo'<option>'.$i.'</option>';
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>
-							<div class="checkbox">
-							  <label>
-								<input type="checkbox" required="required"/><i class="check-box"></i>Accept Terms & Conditions ?
-							  </label>
-							</div>
-							<a href="#" title="" class="already-have">Already have an account</a>
-							<div class="submit-btns">
-								<button class="mtr-btn signup" type="button"><span>Register</span></button>
-							</div>
-						</form>
-					</div>
+
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 	
-	<script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/main.min.js"></script>
 	<script src="js/script.js"></script>
 
 </body>	
