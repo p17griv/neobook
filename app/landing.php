@@ -33,7 +33,7 @@ include("connect_to_db.php");
 							NeoBook is a free online social network for everyone who loves graphs!
 						</p>
 						<div class="friend-logo">
-							<span><img src="images/wink.png" alt=""></span>
+							<span><img src="https://static.thenounproject.com/png/374726-200.png"></span>
 						</div>
 						<a href="https://github.com/p17griv/neobook" title="" class="folow-me">View Project On GitHub</a>
 					</div>	
