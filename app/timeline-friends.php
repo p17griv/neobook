@@ -1,3 +1,24 @@
+<?php
+include("connect_to_db.php");
+
+// Check if no one is logged in
+if(!isset($_COOKIE["user"])) {
+    header('Location: landing.php'); // Redirect to landing.php
+}
+else {
+    // Check if user parameter was not given in the url
+    if(!isset($_GET['user']) or $_GET['user'] == null) {
+        header('Location: time-line.php?user='.$_COOKIE['user']); // Redirect to logged-in user's profile
+    }
+
+    $query = "MATCH (u:User) WHERE u.id = " .$_GET["user"]." RETURN count(u) as cu";
+    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+    // Check if there is a user with id equal to user parameter
+    if($result->get('cu') != 1) {
+        header('Location: time-line.php?user='.$_COOKIE['user']); // Redirect to logged-in user's profile
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,8 +41,108 @@
 
     <?php
     include('nav-bar.php');
-    include('timeline-header.php')
     ?>
+
+    <section>
+        <div class="feature-photo">
+            <figure><img src="images/resources/timeline-1.jpg" alt=""></figure>
+            <div class="add-btn">
+                <?php
+                $query = "MATCH (u:User) WHERE u.id = " .$_GET["user"]. "\n
+                    MATCH (m:User)-[:FOLLOWS]->(u) RETURN count(m) as cm"; // Get current user's number of followers
+                $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                echo '<span>'.$result->get('cm').' followers</span>';
+
+                if ($_GET['user'] != $_COOKIE['user']) {
+                    $query = "MATCH (u:User) WHERE u.id = " . $_COOKIE["user"] . "\n 
+                        MATCH (m:User) WHERE m.id = ".$_GET['user']."\n 
+                        MATCH (u)-[:FOLLOWS]->(m) RETURN count(m) as cm"; // Check if logged-in user follows current user
+                    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                    if ($result->get('cm') > 0) {
+                        //logged-in user follows current user
+                        echo '<a id="followbtn" href="" onclick="unfollow('.$_COOKIE['user'].', '.$_GET['user'].')">Unfollow</a>';
+                        echo '
+            <script>
+                function unfollow(id1, id2) {
+                  var xhttp;
+                  xhttp = new XMLHttpRequest();
+                  xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                      document.getElementById("followbtn").innerHTML = this.responseText;
+                    }
+                  };  
+                  xhttp.open("GET", "unfollow.php?user1="+id1+"&user2="+id2, true);
+                  xhttp.send();
+                }
+            </script>
+            ';
+                    }
+                    else {
+                        //logged-in user does not follow current user
+                        echo '<a id="followbtn" href="" onclick="follow('.$_COOKIE['user'].', '.$_GET['user'].')">Follow</a>';
+                        echo '
+            <script>
+                function follow(id1, id2) {
+                  var xhttp;
+                  xhttp = new XMLHttpRequest();
+                  xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                      document.getElementById("followbtn").innerHTML = this.responseText;
+                    }
+                  };  
+                  xhttp.open("GET", "follow.php?user1="+id1+"&user2="+id2, true);
+                  xhttp.send();
+                }
+            </script>
+            ';
+                    }
+                }
+                ?>
+
+            </div>
+            <div class="container-fluid">
+                <div class="row merged">
+                    <div class="col-lg-2 col-sm-3">
+                        <div class="user-avatar">
+                            <figure>
+                                <?php
+                                if ($_GET['user'] == $_COOKIE['user']) {
+                                    $query = "MATCH (u:User) WHERE u.id = " . $_COOKIE["user"] . " RETURN u.profileImageUrl , u.fullname, u.city, u.country"; // Get current user's profile info
+                                    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                    echo "<img style='width: 100%; height: 200px' src='" . $result->get('u.profileImageUrl') . "'>";
+                                } else {
+                                    $query = "MATCH (u:User) WHERE u.id = " . $_GET["user"] . " RETURN u.profileImageUrl , u.fullname, u.city, u.country"; // Get current user's profile info
+                                    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                    echo "<img style='width: 100%; height: 200px' src='" . $result->get('u.profileImageUrl') . "'>";
+                                }
+
+                                echo '
+                            </figure>
+                            </div>
+                        </div>
+                        <div class="col-lg-10 col-sm-9">
+                            <div class="timeline-info">
+                                <ul>
+                                    <li class="admin-name">
+                                      <h5>'.$result->get('u.fullname').'</h5>
+                                      <span>'.str_replace('"', '', $result->get('u.city')).', '.str_replace('"','',$result->get('u.country')).'</span>
+                                    </li>
+                                    <li>
+                                        <a href="time-line.php?user='.$_GET['user'].'">Profile</a>
+                                        <a href="timeline-photos.php?user='.$_GET['user'].'">Photos</a>
+                                        <a class="active" href="timeline-friends.php?user='.$_GET['user'].'">Followers</a>
+                                        <a href="about.php?user='.$_GET['user'].'">Info</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!-- top area -->';
+                                ?>
 
 	<section>
 		<div class="gap gray-bg">
@@ -35,75 +156,157 @@
 								<div class="central-meta">
 									<div class="frnds">
 										<ul class="nav nav-tabs">
-											 <li class="nav-item"><a class="active" href="#frends" data-toggle="tab">Followers</a> <span>{followerscont}</span></li>
-											 <li class="nav-item"><a class="" href="#frends-req" data-toggle="tab">Follows</a><span>{followscount}</span></li>
+                                            <?php
+                                            $query = "MATCH (u:User) WHERE u.id = ".$_GET["user"]."\n 
+                                                MATCH (m:User)-[r:FOLLOWS]->(u) RETURN count(m) as nf"; // Get the number of followers
+                                            $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                            echo '<li class="nav-item"><a class="active" href="#frends" data-toggle="tab">Followers</a> <span>'.$result->get('nf').'</span></li>';
+                                            $query = "MATCH (u:User) WHERE u.id = ".$_GET["user"]."\n 
+                                                MATCH (u)-[r:FOLLOWS]->(m:User) RETURN count(m) as nf"; // Get the number of follows
+                                            $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                            echo '<li class="nav-item"><a class="" href="#frends-req" data-toggle="tab">Follows</a><span>'.$result->get('nf').'</span></li>';
+                                            ?>
 										</ul>
 
-										<!-- Tab panes -->
-										<div class="tab-content">
-										  <div class="tab-pane active fade show " id="frends" >
-											<ul class="nearby-contct">
-											<li>
-												<div class="nearly-pepls">
-													<figure>
-														<a href="time-line.html" title=""><img src="images/resources/friend-avatar9.jpg" alt=""></a>
-                                                        <!-- <a href="time-line.html" title=""><img src="userprofileimageurl" alt=""></a> -->
-													</figure>
-													<div class="pepl-info">
-														<h4><a href="time-line.html" title="">{userfullname}</a></h4>
-														<span>{usercity, usercountry}</span>
-														<a href="#" title="" class="add-butn more-action" data-ripple="">unfollow</a>
-														<a href="#" title="" class="add-butn" data-ripple="">follow</a>
-													</div>
-												</div>
-											</li>
-											<li>
-												<div class="nearly-pepls">
-													<figure>
-														<a href="time-line.html" title=""><img src="images/resources/nearly1.jpg" alt=""></a>
-													</figure>
-													<div class="pepl-info">
-														<h4><a href="time-line.html" title="">sophia Gate</a></h4>
-														<span>tv actresses</span>
-                                                        <a href="#" title="" class="add-butn more-action" data-ripple="">unfollow</a>
-                                                        <a href="#" title="" class="add-butn" data-ripple="">follow</a>
-													</div>
-												</div>
-											</li>
-										</ul>
-										  </div>
-										  <div class="tab-pane fade" id="frends-req" >
-											<ul class="nearby-contct">
-                                                <li>
-                                                    <div class="nearly-pepls">
-                                                        <figure>
-                                                            <a href="time-line.html" title=""><img src="images/resources/friend-avatar9.jpg" alt=""></a>
-                                                            <!-- <a href="time-line.html" title=""><img src="userprofileimageurl" alt=""></a> -->
-                                                        </figure>
-                                                        <div class="pepl-info">
-                                                            <h4><a href="time-line.html" title="">{userfullname}</a></h4>
-                                                            <span>{usercity, usercountry}</span>
-                                                            <a href="#" title="" class="add-butn more-action" data-ripple="">unfollow</a>
-                                                            <a href="#" title="" class="add-butn" data-ripple="">follow</a>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="nearly-pepls">
-                                                        <figure>
-                                                            <a href="time-line.html" title=""><img src="images/resources/nearly1.jpg" alt=""></a>
-                                                        </figure>
-                                                        <div class="pepl-info">
-                                                            <h4><a href="time-line.html" title="">sophia Gate</a></h4>
-                                                            <span>tv actresses</span>
-                                                            <a href="#" title="" class="add-butn more-action" data-ripple="">unfollow</a>
-                                                            <a href="#" title="" class="add-butn" data-ripple="">follow</a>
-                                                        </div>
-                                                    </div>
-                                                </li>
-										</ul>
-										  </div>
-										</div>
+                                        <!-- Tab panes -->
+                                        <div class="tab-content">
+                                            <div class="tab-pane active fade show " id="frends" >
+                                                <ul class="nearby-contct">
+                                                    <?php
+                                                    $query = "MATCH (u:User) WHERE u.id = ".$_GET["user"]."\n 
+                                                        MATCH (m:User)-[r:FOLLOWS]->(u) RETURN m ORDER BY m.fullname"; // Get all followers of current user
+                                                    $followers = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                                                    foreach ($followers->getNodes() as $node) {
+                                                        echo '
+                                                            <li>
+                                                                <div class="nearly-pepls">
+                                                                    <figure>
+                                                                        <a href="time-line.php?user=' . $node->getProperty('id') . '"><img style="width: 100%; height: 60px" src="' . $node->getProperty('profileImageUrl') . '"></a>
+                                                                    </figure>
+                                                                    <div class="pepl-info">
+                                                                        <h4><a href="time-line.php?user=' . $node->getProperty('id') . '">' . $node->getProperty('fullname') . '</a></h4>';
+                                                        if ($node->getProperty('city') != null and $node->getProperty('country') != null) {
+                                                            echo '<span>'.str_replace('"', '', $node->getProperty('city')).', '.str_replace('"','',$node->getProperty('country')).'</span>';
+                                                        }
+
+                                                        $query = "MATCH (u:User) WHERE u.id = " . $_COOKIE["user"] . "\n 
+                                                            MATCH (m:User) WHERE m.id = " . $node->getProperty('id') . "\n 
+                                                            MATCH (u)-[:FOLLOWS]->(m) RETURN count(m) as cm"; // Check if logged-in user follows current user
+                                                        $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                                        if ($node->getProperty('id') != $_COOKIE['user']) {
+                                                            if ($result->get('cm') > 0) {
+                                                                // Logged-in user follows current user
+                                                                echo '<a id="followbtn'.$node->getProperty('id').'" href="javascript:void(0);" onclick="unfollow(' . $_COOKIE['user'] . ', ' . $node->getProperty('id') . ', this.id)" class="add-butn">Unfollow</a>';
+
+                                                            } else {
+                                                                // Logged-in user does not follow current user
+                                                                echo '<a id="followbtn'.$node->getProperty('id').'" href="javascript:void(0);" onclick="follow(' . $_COOKIE['user'] . ', ' . $node->getProperty('id') . ', this.id)" class="add-butn">Follow</a>';
+                                                            }
+                                                            echo '                                                                      
+                                                                    </div>
+                                                                </div>
+                                                            </li>';
+                                                        }
+                                                    }
+                                                    echo '
+                                                    <script>
+                                                        function unfollow(id1, id2, target) {
+                                                          var xhttp;
+                                                          xhttp = new XMLHttpRequest();
+                                                          xhttp.onreadystatechange = function() {
+                                                            if (this.readyState == 4 && this.status == 200) {
+                                                              document.getElementById(target).innerHTML = this.responseText;
+                                                            }
+                                                          };  
+                                                          xhttp.open("GET", "unfollow.php?user1="+id1+"&user2="+id2, true);
+                                                          xhttp.send();
+                                                        }
+                                                    
+                                                        function follow(id1, id2, target) {
+                                                          var xhttp;
+                                                          xhttp = new XMLHttpRequest();
+                                                          xhttp.onreadystatechange = function() {
+                                                            if (this.readyState == 4 && this.status == 200) {
+                                                              document.getElementById(target).innerHTML = this.responseText;
+                                                            }
+                                                          };  
+                                                          xhttp.open("GET", "follow.php?user1="+id1+"&user2="+id2, true);
+                                                          xhttp.send();
+                                                        }
+                                                    </script>';
+                                                    ?>
+                                                </ul>
+                                            </div>
+                                            <div class="tab-pane fade" id="frends-req" >
+                                                <ul class="nearby-contct">
+                                                    <?php
+                                                    $query = "MATCH (u:User) WHERE u.id = ".$_GET["user"]."\n 
+                                                        MATCH (u)-[r:FOLLOWS]->(m:User) RETURN m ORDER BY m.fullname"; // Get all follows of current user
+                                                    $follows = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                                                    foreach ($follows->getNodes() as $node) {
+                                                        echo '
+                                                            <li>
+                                                                <div class="nearly-pepls">
+                                                                    <figure>
+                                                                        <a href="time-line.php?user=' . $node->getProperty('id') . '"><img style="width: 100%; height: 60px" src="' . $node->getProperty('profileImageUrl') . '"></a>
+                                                                    </figure>
+                                                                    <div class="pepl-info">
+                                                                        <h4><a href="time-line.php?user=' . $node->getProperty('id') . '">' . $node->getProperty('fullname') . '</a></h4>';
+                                                        if ($node->hasProperty('city') != null and $node->hasProperty('country') != null) {
+                                                            echo '<span>'.str_replace('"', '', $node->getProperty('city')).', '.str_replace('"','',$node->getProperty('country')).'</span>';
+                                                        }
+
+
+                                                        $query = "MATCH (u:User) WHERE u.id = " . $_COOKIE["user"] . "\n 
+                                                            MATCH (m:User) WHERE m.id = " . $node->getProperty('id') . "\n 
+                                                            MATCH (u)-[:FOLLOWS]->(m) RETURN count(m) as cm"; // Check if logged-in user follows current user
+                                                        $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                                        if ($node->getProperty('id') != $_COOKIE['user']) {
+                                                            if ($result->get('cm') > 0) {
+                                                                // Logged-in user follows current user
+                                                                echo '<a id="followbutton'.$node->getProperty('id').'" href="javascript:void(0);" onclick="unfollowfollow(' . $_COOKIE['user'] . ', ' . $node->getProperty('id') . ', this.id)" class="add-butn">Unfollow</a>';
+                                                            } else {
+                                                                // Logged-in user does not follow current user
+                                                                echo '<a id="followbutton'.$node->getProperty('id').'" href="javascript:void(0);" onclick="followfollow(' . $_COOKIE['user'] . ', ' . $node->getProperty('id') . ', this.id)" class="add-butn">Follow</a>';
+                                                            }
+                                                            echo '                                                                      
+                                                                    </div>
+                                                                </div>
+                                                            </li>';
+                                                        }
+                                                    }
+                                                    echo '
+                                                    <script>
+                                                        function unfollowfollow(id1, id2, target) {
+                                                          var xhttp;
+                                                          xhttp = new XMLHttpRequest();
+                                                          xhttp.onreadystatechange = function() {
+                                                            if (this.readyState == 4 && this.status == 200) {
+                                                              document.getElementById(target).innerHTML = this.responseText;
+                                                            }
+                                                          };  
+                                                          xhttp.open("GET", "unfollow.php?user1="+id1+"&user2="+id2, true);
+                                                          xhttp.send();
+                                                        }
+                                                        
+                                                        function followfollow(id1, id2, target) {
+                                                          var xhttp;
+                                                          xhttp = new XMLHttpRequest();
+                                                          xhttp.onreadystatechange = function() {
+                                                            if (this.readyState == 4 && this.status == 200) {
+                                                              document.getElementById(target).innerHTML = this.responseText;
+                                                            }
+                                                          };  
+                                                          xhttp.open("GET", "follow.php?user1="+id1+"&user2="+id2, true);
+                                                          xhttp.send();
+                                                        }
+                                                    </script>';
+                                                    ?>
+                                                </ul>
+                                            </div>
+                                        </div>
 									</div>
 								</div>	
 							</div><!-- centerl meta -->

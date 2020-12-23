@@ -102,7 +102,7 @@ if __name__ == '__main__':
             email = produce_email(fullname, birthDate)
             interests = produce_interests()
             random_place = produce_cities()
-            city = random_place[0]
+            city = random_place[1]
             country = random_place[4]
             latitude = random_place[2]
             longitude = random_place[3]

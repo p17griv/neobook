@@ -7,7 +7,7 @@ if(isset($_GET["searchTerm"]) and !empty($_GET["searchTerm"])) {
 
     echo '<div id="myDropdown" class="dropdown-content">';
     foreach ($result->getNodes() as $node) {
-        echo '<a href="time-line.php?id=" >'.$node->getProperty('fullname').'</a>';
+        echo '<a href="time-line.php?user='.$node->getProperty('id').'" >'.$node->getProperty('fullname').'</a>';
     }
     echo '</div>';
 }

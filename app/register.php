@@ -5,6 +5,54 @@ if(isset($_COOKIE["user"])) {
 }
 
 include("connect_to_db.php");
+
+if (isset($_POST["fullname"], $_POST["password"], $_POST["email"], $_POST["day"], $_POST["month"], $_POST["year"], $_POST["gender"])) {
+    $query = "MATCH (u:User) WHERE u.email = '" . $_POST['email'] . "' RETURN u.email"; // Get an user email that's equal to the given email
+    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+    $email = $result->get('u.email'); // Get the email
+    $hashed_pass = hash('sha256', $_POST["password"]); // Hash the given password text
+
+    // Check if day, month & year fields have not the default values
+    if ($_POST["day"] != "Day" and $_POST["month"] != "Month" and $_POST["year"] != 'Year') {
+
+        // Make day in an appropriate format
+        $day = (int)$_POST["day"];
+        if ($day < 10) {
+            $day = '0' . $day;
+        }
+
+        // Make month in an appropriate format
+        $arrayVariable = [
+            'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+            'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+            'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12,
+        ];
+        $month = $arrayVariable[$_POST["month"]];
+        if ($month < 10) {
+            $month = '0' . $month;
+        } else {
+            $month = $arrayVariable[$_POST["month"]];
+        }
+
+        // Make birthDate in an appropriate format
+        $birthDate = $_POST["year"] . '/' . $month . '/' . $day;
+    }
+
+    // If there isn't an email in db that's equal with the given email
+    if ($email != $_POST["email"]) {
+        $query = 'MATCH (u:User) RETURN MAX(u.id) AS mx'; // Get the maximum value of user's id
+        $lastId = $client->sendCypherQuery($query)->getResult(); // Execute query
+        $newId = $lastId->get('mx');
+        $newId = (int)$newId + 1; // Calculate the id of the new user
+
+        // Create the new user with all given information as properties
+        $query = "CREATE (u:User { id: " . $newId . ", fullname: '" . $_POST["fullname"] . "', email: '" . $_POST["email"] . "', gender: '" . $_POST["gender"] . "', birthDate: '" . $birthDate . "', password: '" . $hashed_pass . "', profileImageUrl: 'https://www.nailseatowncouncil.gov.uk/wp-content/uploads/blank-profile-picture-973460_1280.jpg'})";
+        $client->sendCypherQuery($query); // Execute query
+
+        setcookie("user", $newId, time() + (86400 * 30), "/"); // Set a cookie with the new user's id as value
+        header('Location: index.php'); // Redirect to index.php
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +81,7 @@ include("connect_to_db.php");
 							NeoBook is a free online social network for everyone who loves graphs!
 						</p>
 						<div class="friend-logo">
-							<span><img src="images/wink.png" alt=""></span>
+							<span><img src="https://static.thenounproject.com/png/374726-200.png"></span>
 						</div>
 						<a href="https://github.com/p17griv/neobook" title="" class="folow-me">View Project On GitHub</a>
 					</div>	
@@ -131,55 +179,7 @@ include("connect_to_db.php");
                                 <button class="mtr-btn signin" type="submit"><span>Register</span></button>
                             </div>
                             <?php
-                            if (isset($_POST["fullname"], $_POST["password"], $_POST["email"], $_POST["day"], $_POST["month"], $_POST["year"], $_POST["gender"])) {
-                                $query = "MATCH (u:User) WHERE u.email = '" . $_POST['email'] . "' RETURN u.email"; // Get an user email that's equal to the given email
-                                $result = $client->sendCypherQuery($query)->getResult(); // Execute query
-                                $email = $result->get('u.email'); // Get the email
-                                $hashed_pass = hash('sha256', $_POST["password"]); // Hash the given password text
 
-                                // Check if day, month & year fields have not the default values
-                                if ($_POST["day"] != "Day" and $_POST["month"] != "Month" and $_POST["year"] != 'Year') {
-
-                                    // Make day in an appropriate format
-                                    $day = (int)$_POST["day"];
-                                    if ($day < 10) {
-                                        $day = '0' . $day;
-                                    }
-
-                                    // Make month in an appropriate format
-                                    $arrayVariable = [
-                                        'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
-                                        'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
-                                        'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12,
-                                    ];
-                                    $month = $arrayVariable[$_POST["month"]];
-                                    if ($month < 10) {
-                                        $month = '0' . $month;
-                                    } else {
-                                        $month = $arrayVariable[$_POST["month"]];
-                                    }
-
-                                    // Make birthDate in an appropriate format
-                                    $birthDate = $_POST["year"] . '/' . $month . '/' . $day;
-                                }
-
-                                // If there isn't an email in db that's equal with the given email
-                                if ($email != $_POST["email"]) {
-                                    $query = 'MATCH (u:User) RETURN MAX(u.id) AS mx'; // Get the maximum value of user's id
-                                    $lastId = $client->sendCypherQuery($query)->getResult(); // Execute query
-                                    $newId = $lastId->get('mx');
-                                    $newId = (int)$newId + 1; // Calculate the id of the new user
-
-                                    // Create the new user with all given information as properties
-                                    $query = "CREATE (u:User { id: " . $newId . ", fullname: '" . $_POST["fullname"] . "', email: '" . $_POST["email"] . "', gender: '" . $_POST["gender"] . "', birthDate: '" . $birthDate . "', password: '" . $hashed_pass . "' })";
-                                    $client->sendCypherQuery($query); // Execute query
-
-                                    setcookie("user", $newId, time() + (86400 * 30), "/"); // Set a cookie with the new user's id as value
-                                    header('Location: index.php'); // Redirect to index.php
-                                } else {
-                                    echo "<br><br><p style='color: red'>User already exists!</p>";
-                                }
-                            }
                             ?>
                         </form>
 					</div>

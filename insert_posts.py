@@ -60,7 +60,7 @@ if __name__ == '__main__':
                 post_text = produce_post_text()
                 post_image = produce_post_image_url()
                 timestamp = produce_post_timestamp()
-                likes_count = random.randint(0, 1382)
+                likes_count = random.randint(0, 67)
 
                 session.write_transaction(create_post, user, post_count, post_text, post_image, timestamp, likes_count)
 

@@ -40,7 +40,7 @@ echo '
 			</div>
 			<ul class="setting-area">
 				<li>
-                    <a href="index.php" title="Home" data-ripple="">
+                    <a id="homeBtn" href="index.php" title="Home" data-ripple="">
                         <i class="ti-home"></i>
                     </a>
                 </li>
@@ -48,11 +48,18 @@ echo '
 			<div class="user-img">
                 <img style="width: 65px; height: 60px" src="'.$profileImageUrl.'">
 				<div class="user-setting">
-					<a href="time-line.php"><i class="ti-user"></i> view profile</a>
-					<a href="edit-profile-basic.php" title=""><i class="ti-pencil-alt"></i>edit profile</a>
-					<a href="setting.php" title=""><i class="ti-settings"></i>account setting</a>
-					<a href="#" title=""><i class="ti-power-off"></i>log out</a>
+					<a id="profileBtn" href="time-line.php"><i class="ti-user"></i> view profile</a>
+					<a id="editProfileBtn" href="edit-profile-basic.php" title=""><i class="ti-pencil-alt"></i>edit profile</a>
+					<a id="accountSettingBtn" href="setting.php" title=""><i class="ti-settings"></i>account setting</a>
+					<a id="logoutBtn" href="log-out.php" title=""><i class="ti-power-off"></i>log out</a>
 				</div>
+				<script>
+				    document.getElementById("homeBtn").onclick = function () { location.href = "index.php"; };
+				    document.getElementById("profileBtn").onclick = function () { location.href = "time-line.php"; };
+				    document.getElementById("editProfileBtn").onclick = function () { location.href = "edit-profile-basic.php"; };
+				    document.getElementById("accountSettingBtn").onclick = function () { location.href = "setting.php"; };
+				    document.getElementById("logoutBtn").onclick = function () { location.href = "log-out.php"; };
+                </script>
 			</div>
 			<ul class="setting-area"><li></li></ul>
 		</div>

@@ -38,7 +38,7 @@ include("connect_to_db.php");
 
                             <div class="col-lg-3">
 								<aside class="sidebar static left">
-									<div class="widget stick-widget">
+									<div class="widget">
 										<h4 class="widget-title">Who's follownig</h4>
 										<ul class="followers">
                                             <?php
@@ -51,8 +51,11 @@ include("connect_to_db.php");
                                                 <li>
 												    <figure><img style='width: 50px; height: 40px' src='".$node->getProperty('profileImageUrl')."'></figure>
 												    <div class='friend-meta'>
-													    <h4><a href='time-line.html'>".$node->getProperty('fullname')."</a></h4>
-													    <a href='#' class='underline'>Follow Back</a>
+													    <h4><a href='time-line.php?user=".$node->getProperty('id')."'>".$node->getProperty('fullname')."</a></h4>";
+                                                if ($node->getProperty('city') != null and $node->getProperty('country') != null) {
+                                                    echo '<a class="underline">'.str_replace('"', '', $node->getProperty('city')).', '.str_replace('"','',$node->getProperty('country')).'</a>';
+                                                }
+                                                echo "
                                                     </div>
 											    </li>
                                                 ";
@@ -60,7 +63,37 @@ include("connect_to_db.php");
                                             ?>
 										</ul>
 									</div><!-- who's following -->
-								</aside>
+
+                                    <div class="widget stick-widget">
+                                        <h4 class="widget-title">People near you</h4>
+                                        <?php
+                                        $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE["user"]." RETURN u.city, u.country"; // Get the city and country of current user
+                                        $results = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                        echo '<h6 style="text-align: center; color: #088dcd; padding-bottom: 5px">'.str_replace('"', '', $results->get('u.city')).', '.str_replace('"', '', $results->get('u.country')).'</h6>';
+                                        ?>
+
+                                        <ul class="followers">
+                                            <?php
+                                            $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE["user"]." RETURN u.city"; // Get current uset's city
+                                            $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                            $query = "MATCH (m:User) WHERE m.city = '".$result->get('u.city')."' RETURN m ORDER BY m.fullname LIMIT 15"; // Get 15 users who are in tha same city with current user
+                                            $users = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                                            foreach ($users->getNodes() as $node) {
+                                                if ($node->getProperty('id') != $_COOKIE['user']) {
+                                                    echo "
+                                                    <li>
+                                                        <figure><img style='width: 50px; height: 40px' src='".$node->getProperty('profileImageUrl')."'></figure>
+                                                        <div class='friend-meta'>
+                                                            <h4><a href='time-line.php?user=".$node->getProperty('id')."'>".$node->getProperty('fullname')."</a></h4>
+                                                        </div>
+                                                    </li>";
+                                                }
+                                            }
+                                            ?>
+                                        </ul>
+                                    </div><!-- in the same area -->
+                                </aside>
 							</div><!-- sidebar -->
 
                             <div class="col-lg-6">
@@ -109,11 +142,10 @@ include("connect_to_db.php");
                                                 else {
                                                     // Create a post with only text
                                                     $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE['user']."\n 
-                                                    CREATE (u)-[:UPLOADS]->(p:Post {id: ".$newId.", text: '".$_POST['newPostText']."', timestamp: '".date("Y/m/d h:i")."', likesCount: 0 })";
+                                                    CREATE (u)-[:UPLOADS]->(p:Post {id: ".$newId.", text: '".$_POST['newPostText']."', timestamp: '".date("Y/m/d h:i")."', likesCount: 0, imageUrl: '-' })";
                                                 }
+                                                $client->sendCypherQuery($query)->getResult(); // Execute query
                                             }
-
-                                            $client->sendCypherQuery($query)->getResult(); // Execute query
                                             ?>
 										</div>
 									</div>
@@ -127,7 +159,7 @@ include("connect_to_db.php");
                                     MATCH (u:User) WHERE u.id = ".$_COOKIE["user"]."\n 
                                     MATCH (u)-[:FOLLOWS]->(m:User)\n
                                     MATCH (m)-[:UPLOADS]->(p:Post) RETURN p AS posts }
-                                    RETURN posts ORDER BY posts.timestamp DESC
+                                    RETURN posts ORDER BY posts.timestamp DESC LIMIT 50
                                     "; // Get all posts of all follows of current user (included current user's posts)
                                 $posts = $client->sendCypherQuery($query)->getResult(); // Execute query
 
@@ -143,7 +175,7 @@ include("connect_to_db.php");
                                                     <img style="width: 100%; height: 45px" src="'.$postOwner->get('u.profileImageUrl').'">
                                                 </figure>
                                                 <div class="friend-name">
-                                                    <a href="time-line.php?id='.$postOwner->get('u.id').'">'.$postOwner->get('u.fullname').'</a>
+                                                    <a href="time-line.php?user='.$postOwner->get('u.id').'">'.$postOwner->get('u.fullname').'</a>
                                                     <span>published: '.$post->getProperty('timestamp').'</span>
                                                 </div>
                                                 <div class="post-meta">
@@ -172,15 +204,7 @@ include("connect_to_db.php");
                                                         <li>
                                                             <span class="like" data-toggle="tooltip" title="like">
                                                                 <i class="ti-heart"></i>
-                                                                <form id="likesForm" style="display:inline;" method="post" action="index.php">
-                                                                    <input type="hidden" name="postId" value="'.$post->getProperty('id').'"/>
-                                                                    <ins onclick="increaseLikes()">'.$post->getProperty("likesCount").'</ins>
-                                                                </form>
-                                                                <script>
-                                                                    function increaseLikes() {
-                                                                        document.getElementById("likesForm").submit();
-                                                                    }
-                                                                </script>
+                                                                <ins id="likesNumber'.$post->getProperty('id').'" onclick="increaseLikes(this.id)">'.$post->getProperty("likesCount").'</ins>
                                                             </span>
                                                         </li>
                                                     </ul>
@@ -191,11 +215,21 @@ include("connect_to_db.php");
                                     </div>
                                     ';
                                 }
-                                if(isset($_POST["postId"])) {
-                                    $query = "MATCH (p:Post) WHERE p.id = ".$_POST["postId"]."\n
-                                    SET p.likesCount = p.likesCount + 1"; // Increase current post's likes number by 1
-                                    $client->sendCypherQuery($query)->getResult(); // Execute query
-                                }
+                                echo '
+                                <script>
+                                    function increaseLikes(id) {
+                                      var xhttp;
+                                      xhttp = new XMLHttpRequest();
+                                      xhttp.onreadystatechange = function() {
+                                        if (this.readyState == 4 && this.status == 200) {
+                                          document.getElementById(id).innerHTML = this.responseText;
+                                        }
+                                      };  
+                                      xhttp.open("GET", "likes.php?postId="+id, true);
+                                      xhttp.send();
+                                    }
+                                </script>
+                                '
                                 ?>
 
 							</div><!-- centerl meta -->
@@ -256,7 +290,7 @@ include("connect_to_db.php");
                                                         echo '<div class="users-thumb-list">';
                                                         foreach ($followers->getNodes() as $node) {
                                                             echo '
-                                                            <a href="#" title="'.$node->getProperty('fullname').'" data-toggle="tooltip">
+                                                            <a href="time-line.php?user='.$node->getProperty('id').'" title="'.$node->getProperty('fullname').'" data-toggle="tooltip">
                                                                 <img style="width: 40px; height: 40px" src="'.$node->getProperty('profileImageUrl').'">
                                                             </a>';
                                                         }
@@ -279,7 +313,7 @@ include("connect_to_db.php");
                                                         echo '<div class="users-thumb-list">';
                                                         foreach ($follows->getNodes() as $node) {
                                                             echo '
-                                                            <a href="#" title="'.$node->getProperty('fullname').'" data-toggle="tooltip">
+                                                            <a href="time-line.php?user='.$node->getProperty('id').'" title="'.$node->getProperty('fullname').'" data-toggle="tooltip">
                                                                 <img style="width: 40px; height: 40px" src="'.$node->getProperty('profileImageUrl').'">
                                                             </a>';
                                                         }

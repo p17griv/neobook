@@ -1,3 +1,11 @@
+<?php
+include("connect_to_db.php");
+
+// Check if no one is logged in
+if(!isset($_COOKIE["user"])) {
+    header('Location: landing.php'); // Redirect to landing.php
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,8 +27,56 @@
 
     <?php
     include('nav-bar.php');
-    include('timeline-header.php')
     ?>
+
+    <section>
+        <div class="feature-photo">
+            <figure><img src="images/resources/timeline-1.jpg" alt=""></figure>
+            <div class="add-btn">
+                <?php
+                $query = "MATCH (u:User) WHERE u.id = " .$_COOKIE["user"]. "\n
+                    MATCH (m:User)-[:FOLLOWS]->(u) RETURN count(m) as cm"; // Get current user's number of followers
+                $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                echo '<span>'.$result->get('cm').' followers</span>';
+                ?>
+
+            </div>
+            <div class="container-fluid">
+                <div class="row merged">
+                    <div class="col-lg-2 col-sm-3">
+                        <div class="user-avatar">
+                            <figure>
+                                <?php
+                                    $query = "MATCH (u:User) WHERE u.id = " . $_COOKIE["user"] . " RETURN u.profileImageUrl , u.fullname, u.city, u.country"; // Get current user's profile info
+                                    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                    echo "<img style='width: 100%; height: 200px' src='" . $result->get('u.profileImageUrl') . "'>";
+                                echo '
+                            </figure>
+                            </div>
+                        </div>
+                        <div class="col-lg-10 col-sm-9">
+                            <div class="timeline-info">
+                                <ul>
+                                    <li class="admin-name">
+                                      <h5>'.$result->get('u.fullname').'</h5>
+                                      <span>'.str_replace('"', '', $result->get('u.city')).', '.str_replace('"','',$result->get('u.country')).'</span>
+                                    </li>
+                                    <li>
+                                        <a href="time-line.php?user='.$_COOKIE['user'].'">Profile</a>
+                                        <a href="timeline-photos.php?user='.$_COOKIE['user'].'">Photos</a>
+                                        <a href="timeline-friends.php?user='.$_COOKIE['user'].'">Followers</a>
+                                        <a href="about.php?user='.$_COOKIE['user'].'">Info</a>
+                                        <a class="active" href="#">More</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!-- top area -->';
+                                ?>
 
 	<section>
 		<div class="gap gray-bg">
@@ -49,35 +105,43 @@
 								<div id="basic_info" class="central-meta">
 									<div class="editing-info">
 										<h5 class="f-title"><i class="ti-info-alt"></i> Edit Basic Information</h5>
+                                        <form method="post" action="edit-profile-basic.php">
+                                        <?php
+                                        $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE["user"]." RETURN u.birthDate, u.city, u.country, u.phone, u.email"; // Get current user's info
+                                        $results = $client->sendCypherQuery($query)->getResult(); // Execute query
+                                        preg_match('/([0-9]*)\/([0-9]*)\/([0-9]*)/', $results->get('u.birthDate'), $birthDate); // Get the year, month, day of birth from birth date
 
-										<form method="post">
-											<div class="form-group half">	
-											  <input type="text" id="input" required="required"/>
-											  <label class="control-label" for="input">{userfullname}</label><i class="mtrl-select"></i>
+                                        echo '
+                                        <div class="form-group half">	
+											  <input name="newFullname" type="text" id="input" required="required"/>
+											  <label class="control-label" for="input">Fullname</label><i class="mtrl-select"></i>
 											</div>
 											<div class="form-group">	
-											  <input type="text" required="required"/>
-											  <label class="control-label" for="input">{useremail}</label><i class="mtrl-select"></i>
+											  <input disabled type="text"/>
+											  <label class="control-label" for="input">'.$results->get('u.email').'</label><i class="mtrl-select"></i>
 											</div>
 											<div class="form-group">	
-											  <input type="text" required="required"/>
-											  <label class="control-label" for="input">{userphone}</label><i class="mtrl-select"></i>
+											  <input name="newPhone" value="'.$results->get('u.phone').'" type="number" required="required"/>
+											  <label class="control-label" for="input">Phone Number</label><i class="mtrl-select"></i>
 											</div>
 											<div class="dob">
 												<div class="form-group">
-													<select>
-														<option value="Day">{userbirthday}</option>
-                                                        <?php
-                                                        for($i=1; $i<=31; $i++)
-                                                        {
-                                                            echo'<option>'.$i.'</option>';
-                                                        }
-                                                        ?>
-													</select>
+													<select id="selectDay" name="newBirthDay">
+                                                        <option value="Day">Day</option>
+                                                        <script>
+                                                            var select = document.getElementById("selectDay");
+                                                            for (var i = 1; i <= 31; i++){
+                                                                var opt = document.createElement("option");
+                                                                opt.value = i;
+                                                                opt.innerHTML = i;
+                                                                select.appendChild(opt);
+                                                            }
+                                                        </script>
+                                                    </select>
 												</div>
 												<div class="form-group">
-													<select>
-														<option value="month">{userbirthmonth}</option>
+													<select name="newBirthMonth">
+														<option value="Month">Month</option>
 														  <option>Jan</option>
 														  <option>Feb</option>
 														  <option>Mar</option>
@@ -93,41 +157,109 @@
 													</select>
 												</div>
 												<div class="form-group">
-													<select>
-													  <option value="year">{userbirthyear}</option>
-                                                        <?php
-                                                        for($i=date("Y")-18; $i>=1900; $i--)
-                                                        {
-                                                            echo'<option>'.$i.'</option>';
-                                                        }
-                                                        ?>
-													</select>
+													<select id="selectYear" name="newBirthYear">
+                                                        <option value="Year">Year</option>
+                                                        <script>
+                                                            var select = document.getElementById("selectYear");
+                                                            var max = new Date().getFullYear();
+                                                            for (var i = max - 18; i > 1901; i--){
+                                                                var opt = document.createElement("option");
+                                                                opt.value = i;
+                                                                opt.innerHTML = i;
+                                                                select.appendChild(opt);
+                                                            }
+                                                        </script>
+                                                    </select>
 												</div>
-											</div>
-											<div class="form-radio">
-											  <div class="radio">
-												<label>
-												  <input type="radio" checked="checked" name="radio"><i class="check-box"></i>Male
-												</label>
-											  </div>
-											  <div class="radio">
-												<label>
-												  <input type="radio" name="radio"><i class="check-box"></i>Female
-												</label>
-											  </div>
-											</div>
-											<div class="form-group">	
-											  <select>
-												<option value="country">{usercicty}, {usercountry}</option>
-												  <option value="AFG">Afghanistan</option>
-												  <option value="ALA">Ƭand Islands</option>
-												  <option value="ALB">Albania</option>
-											  </select>
+												<br>
+												<div class="form-group">
+													<select name="newCity">
+													    <option value="City">City</option>';
+
+                                        if (($handle = fopen("../Data/worldcities.csv",     "r")) !== FALSE) {
+                                            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                                                if ($data[1] != 'city_ascii') {
+                                                    echo '<option value="&quot;'.$data[1].'&quot;">'.$data[1].', '.$data[4].'</option>';
+                                                }
+                                            }
+                                        echo '				  
+													</select>
+												</div>';
+                                            fclose($handle);
+                                        }
+                                        echo '
 											</div>
 											<div class="submit-btns">
-                                                <button id="updatebtn" type="button" class="mtr-btn"><span>Update</span></button>
+                                                <button type="submit" class="mtr-btn"><span>Update</span></button>
 												<button type="button" class="mtr-btn" onclick="window.location.reload()"><span>Cancel</span></button>
-											</div>
+											</div>';
+                                        if(isset($_POST['newFullname'])) {
+
+                                            // Get country, longitude, latitude based on the given city
+                                            if (($handle = fopen("../Data/worldcities.csv", "r")) !== FALSE) {
+                                                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                                                    $city = '"'.$data[1].'"';
+                                                    if ($city == $_POST['newCity']) {
+                                                        $newCountry = '"'.$data[4].'"';
+                                                        $newLatitude = '"'.$data[2].'"';
+                                                        $newLongitude = '"'.$data[3].'"';
+                                                    }
+                                                }
+                                            }
+
+                                            // Check if new birthDate has the defaults values
+                                            if ($_POST['newBirthDay'] == 'Day' or $_POST['newBirthMonth'] == 'Month' or $_POST['newBirthYear'] == 'Year') {
+                                                // Check if new city has the default value
+                                                if ($_POST['newCity'] == 'City') {
+                                                    // Update user information
+                                                    $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE['user']."\n
+                                                    SET u.fullname = '".$_POST['newFullname']."', u.phone = '".$_POST['newPhone']."', u.city = '";
+                                                }
+                                                else {
+                                                    // Update user information
+                                                    $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE['user']."\n
+                                                    SET u.fullname = '".$_POST['newFullname']."', u.phone = '".$_POST['newPhone']."', u.city = '".$_POST['newCity']."', u.country = '".$newCountry."', u.longitude = '".$newLongitude."', u.latitude = '".$newLatitude."'";
+                                                }
+                                            }
+                                            else {
+                                                // Make day in an appropriate format
+                                                $day = (int)$_POST["newBirthDay"];
+                                                if ($day < 10) {
+                                                    $day = '0' . $day;
+                                                }
+
+                                                // Make month in an appropriate format
+                                                $arrayVariable = [
+                                                    'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+                                                    'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+                                                    'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12,
+                                                ];
+                                                $month = $arrayVariable[$_POST["newBirthMonth"]];
+                                                if ($month < 10) {
+                                                    $month = '0' . $month;
+                                                } else {
+                                                    $month = $arrayVariable[$_POST["month"]];
+                                                }
+
+                                                // Make birthDate in an appropriate format
+                                                $birthDate = $_POST["newBirthYear"] . '/' . $month . '/' . $day;
+
+                                                // Check if new city has the default value
+                                                if ($_POST['newCity'] == 'City') {
+                                                    // Update user information
+                                                    $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE['user']."\n
+                                                    SET u.fullname = '".$_POST['newFullname']."', u.phone = '".$_POST['newPhone']."', u.birthDate = '".$birthDate."'";
+                                                }
+                                                else {
+                                                    // Update user information
+                                                    $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE['user']."\n
+                                                    SET u.fullname = '".$_POST['newFullname']."', u.phone = '".$_POST['newPhone']."', u.birthDate = '".$birthDate."', u.city = '".$_POST['newCity']."', u.country = '".$newCountry."', u.longitude = '".$newLongitude."', u.latitude = '".$newLatitude."'";
+                                                }
+                                            }
+                                            $client->sendCypherQuery($query); // Execute query
+                                            echo '<p style="font-weight: bold; color: green">Information updated successfully!</p>';
+                                        }
+                                        ?>
 										</form>
 									</div>
 								</div>
@@ -135,20 +267,34 @@
                                     <div class="editing-info">
                                         <h5 class="f-title"><i class="fa fa-camera-retro"></i></i> Change Profile Image</h5>
 
-                                        <form method="post">
+                                        <form method="post" action="edit-profile-basic.php">
                                             <figure>
-                                                <img src="images/resources/user-avatar.jpg" alt="">
-                                                <!-- <img src="{userprofileimageurl}" alt=""> -->
+                                                <?php
+                                                $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE["user"]." RETURN u.profileImageUrl"; // Get current user's info
+                                                $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                                                echo '<img style="width: 200px; height: 200px" src="'.$result->get('u.profileImageUrl').'">';
+                                                ?>
+
                                             </figure>
                                             <div class="form-group">
-                                                <input type="text" required="required"/>
+                                                <input name="newProfileImageUrl" type="text" required="required"/>
                                                 <label class="control-label" for="input">New Image URL: </label><i class="mtrl-select"></i>
                                             </div>
                                             <div class="submit-btns">
-                                                <button id="changeimagebtn" type="button" class="mtr-btn"><span>Change Image</span></button>
+                                                <button id="changeimagebtn" type="submit" class="mtr-btn"><span>Change Image</span></button>
                                                 <button type="button" class="mtr-btn" onclick="window.location.reload()"><span>Cancel</span></button>
                                             </div>
                                         </form>
+                                        <?php
+                                        if (isset($_POST['newProfileImageUrl'])) {
+                                            $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE['user']."\n
+                                                    SET u.profileImageUrl = '".$_POST['newProfileImageUrl']."'";
+                                            $client->sendCypherQuery($query); // Execute query
+
+                                            echo '<p style="font-weight: bold; color: green">Profile image updated successfully!</p>';
+                                        }
+                                        ?>
                                     </div>
                                 </div>
                             </div><!-- centerl meta -->
