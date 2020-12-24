@@ -204,7 +204,13 @@ else {
                                     echo '
                                     <div class="central-meta item">
                                         <div class="user-post">
-                                            <div class="friend-info">
+                                            <div class="friend-info">';
+                                    // If current user's profile displayed
+                                    if($_GET['user'] == $_COOKIE['user']) {
+                                        // Show delete button on posts
+                                        echo '<ins class="ti-close" onclick="deletePost(this.id)" id="'.$post->getProperty('id').'" style="font-weight: bold; margin-left: 96%; text-decoration: none;"></ins>';
+                                    }
+                                    echo '
                                                 <figure>
                                                     <img style="width: 100%; height: 65px" src="'.$postOwner->get('u.profileImageUrl').'">
                                                 </figure>
@@ -251,6 +257,18 @@ else {
                                 }
                                 echo '
                                 <script>
+                                    function deletePost(id) {
+                                      var xhttp;
+                                      xhttp = new XMLHttpRequest();
+                                      xhttp.onreadystatechange = function() {
+                                        if (this.readyState == 4 && this.status == 200) {
+                                          location.reload();
+                                        }
+                                      };
+                                      xhttp.open("GET", "delete-post.php?postId="+id, true);
+                                      xhttp.send();
+                                    }
+                                
                                     function increaseLikes(id) {
                                       var xhttp;
                                       xhttp = new XMLHttpRequest();

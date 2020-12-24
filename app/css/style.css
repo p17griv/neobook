@@ -10090,3 +10090,9 @@ aside.sidebar.full-style {
 .dropdown a:hover {background-color: #ddd;}
 
 .show {display: block;}
+
+.ti-close:hover {
+    padding: 3px;
+    background-color: red;
+    color: white;
+}
