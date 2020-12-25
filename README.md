@@ -13,6 +13,9 @@
 ## [Installation Guide](https://github.com/p17griv/neobook/wiki/Installation-Guide)
 ## [App Functions & Cypher Queries](https://github.com/p17griv/neobook/wiki/App-Functionality-&-Cypher-Queries) 
 
+### About [Neo4j](https://neo4j.com/)
+*Neo4j is a native graph database, built from the ground up to leverage not only data but also data relationships. Neo4j connects data as it’s stored, enabling queries never before imagined, at speeds never thought possible.*
+
 ### Project Stages
 1. Find a dataset with relationships between users of a social network.
 2. Plan the functions of the application and the Schema of the Database.
@@ -20,9 +23,6 @@
 4. Write scripts (python) in order to assign information to users and posts, insert them into the database by sending the appropriate [Cypher](https://neo4j.com/developer/cypher/) queries.
 5. Write scripts (python) in order to insert the relationships between users and posts into the databaseby sending the appropriate Cypher queries.
 6. Create the application stracture using PHP and write the appropriate Cypher queries at the appropriate sections of the web pages.
-
-### About [Neo4j](https://neo4j.com/)
-*Neo4j is a native graph database, built from the ground up to leverage not only data but also data relationships. Neo4j connects data as it’s stored, enabling queries never before imagined, at speeds never thought possible.*
 
 ### Documentation - References
 
