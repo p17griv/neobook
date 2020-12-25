@@ -383,7 +383,7 @@ ul.owl-carousel {
 
 .owl-prev::before,
 .owl-next::before {
-    background: #489fe2;
+    background: #96b437;
     border-radius: 50%;
     color: #fff;
     content: "\f0d9";
@@ -495,7 +495,7 @@ header.sticky {
 }
 
 .land-featurearea {
-    background: #1fb6ff none repeat scroll 0 0;
+    background: #96b437 none repeat scroll 0 0;
     color: #fff;
     float: left;
     height: 100vh;
@@ -539,7 +539,7 @@ header.sticky {
 
 .friend-logo > span::before,
 .friend-logo > span::after {
-    background: #0a98dc none repeat scroll 0 0;
+    background: #96b437 none repeat scroll 0 0;
     border: 16px solid rgba(255, 255, 255, 0.1);
     border-radius: 100%;
     content: "";
@@ -842,7 +842,7 @@ header.sticky {
 }
 
 .timeline-info .admin-name > h5 {
-    color: #088dcd;
+    color: #96b437;
     display: inline-block;
     font-size: 24px;
     font-weight: 500;
