@@ -289,7 +289,7 @@ if(!isset($_COOKIE["user"])) {
                                         <?php
                                         if (isset($_POST['newProfileImageUrl'])) {
                                             $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE['user']."\n
-                                                    SET u.profileImageUrl = '".$_POST['newProfileImageUrl']."'";
+                                                    SET u.profileImageUrl = '".$_POST['newProfileImageUrl']."'"; // Change user's profile image url
                                             $client->sendCypherQuery($query); // Execute query
 
                                             echo '<p style="font-weight: bold; color: green">Profile image updated successfully!</p>';

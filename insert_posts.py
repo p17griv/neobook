@@ -51,11 +51,18 @@ def produce_post_timestamp():
 if __name__ == '__main__':
     start_time = time.time()
     driver = ini_conn_with_neo4j()
+    min_posts = 1
+    max_posts = 4
+    try:
+        min_posts = int(input("Give the minimum number of users' posts: "))
+        mas_posts = int(input("Give the maximum number of users' posts: "))
+    except ValueError:
+        print('Invalid inputs! Default values used.')
 
     with driver.session() as session:
         post_count = 0
         for user in range(0, 50):
-            number_of_posts = random.randint(1, 4)
+            number_of_posts = random.randint(min_posts, mas_posts)
             for post in range(0, number_of_posts + 1):
                 post_text = produce_post_text()
                 post_image = produce_post_image_url()

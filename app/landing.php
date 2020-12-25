@@ -49,11 +49,11 @@ include("connect_to_db.php");
 						<form method="post" action="landing.php" >
 							<div class="form-group">	
 							  <input type="text" required="required" name="username"/>
-							  <label class="control-label" for="input">Username</label><i class="mtrl-select"></i>
+							  <label class="control-label" for="input">Username <span style="font-size: 10px">(Node's id)</span></label><i class="mtrl-select"></i>
 							</div>
 							<div class="form-group">	
 							  <input type="password" required="required" name="password"/>
-							  <label class="control-label" for="input">Password</label><i class="mtrl-select"></i>
+							  <label class="control-label" for="input">Password <span style="font-size: 10px">(Node's id)</span></label><i class="mtrl-select"></i>
 							</div>
 							<div class="submit-btns">
 								<button class="mtr-btn signin" type="submit"><span>Login</span></button>

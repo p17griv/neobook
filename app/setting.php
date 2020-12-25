@@ -146,7 +146,7 @@ if(isset($_POST['deleteAction']) and $_POST['deleteAction'] == '1') {
                                                 <?php
                                                 if(isset($_POST['email'])){
                                                     if($_POST['email'] == $_POST['emailConfirm']) {
-                                                        $query = "MATCH (u:User) WHERE u.email = '" . $_POST['email'] . "' RETURN u.email"; // Get an user email that's equal to the given email
+                                                        $query = "MATCH (u:User) WHERE u.email = '" . $_POST['email'] . "' RETURN u.email"; // Get a user email that's equal to the given email
                                                         $result = $client->sendCypherQuery($query)->getResult(); // Execute query
 
                                                         // If there isn't an email in db that's equal with the given email

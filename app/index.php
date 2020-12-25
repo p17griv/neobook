@@ -74,9 +74,9 @@ include("connect_to_db.php");
 
                                         <ul class="followers">
                                             <?php
-                                            $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE["user"]." RETURN u.city"; // Get current uset's city
+                                            $query = "MATCH (u:User) WHERE u.id = ".$_COOKIE["user"]." RETURN u.city"; // Get current user's city
                                             $result = $client->sendCypherQuery($query)->getResult(); // Execute query
-                                            $query = "MATCH (m:User) WHERE m.city = '".$result->get('u.city')."' RETURN m ORDER BY m.fullname LIMIT 15"; // Get 15 users who are in tha same city with current user
+                                            $query = "MATCH (m:User) WHERE m.city = '".$result->get('u.city')."' RETURN m ORDER BY m.fullname LIMIT 15"; // Get 15 users who are in the same city with current user
                                             $users = $client->sendCypherQuery($query)->getResult(); // Execute query
 
                                             foreach ($users->getNodes() as $node) {
