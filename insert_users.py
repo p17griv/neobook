@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     with driver.session() as session:
 
-        for user in range(0, 50):
+        for user in range(0, 200000):
             password = hashlib.sha256(str(user).encode()).hexdigest()
             fullname = produce_name_gender()[0]
             gender = produce_name_gender()[1]

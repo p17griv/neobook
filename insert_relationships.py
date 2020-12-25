@@ -24,10 +24,6 @@ if __name__ == '__main__':
                 user2 = line.split('\t')[1]
                 if int(user1) == int(user2):
                     continue
-                if user1 == '50':  # test mode
-                    break
-                if int(user2) > 49:  # test mode
-                    continue
 
                 print(f'\rInserting: {lines_read} relationships', end="", flush=True)
                 session.write_transaction(create_relationship_of, user1, user2)
