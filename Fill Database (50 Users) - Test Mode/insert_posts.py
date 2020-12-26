@@ -3,6 +3,7 @@ import time
 import random
 
 
+# Send cypher query with all information for the post
 def create_post(tx, owner, id, txt, img, tmstmp, likes):
     cypher_query = "MATCH (u:User) WHERE u.id = $owner\n" \
                    "CREATE (u)-[r:UPLOADS]->(p:Post {id: $id, text: $txt, imageUrl: $img, timestamp: $tmstmp, " \
@@ -10,20 +11,24 @@ def create_post(tx, owner, id, txt, img, tmstmp, likes):
     tx.run(cypher_query, owner=owner, id=id, txt=txt, img=img, tmstmp=tmstmp, likes=likes)
 
 
+# Get a random text from 'posts_text.txt'
 def produce_post_text():
     while True:
-        random_post_text = random.choice(list(open('Data/posts_text.txt', encoding='utf8')))
+        random_post_text = random.choice(list(open('../Data/posts_text.txt', encoding='utf8')))
         if len(random_post_text) > 1:
             return random_post_text
 
 
+# Get an random image URL from the 'SBU_captioned_photo_dataset_urls.txt' or
+# return '-' (post won't have an image) with 50% probability
 def produce_post_image_url():
     if random.randint(0, 1) == 0:
-        return random.choice(list(open('Data/SBU_captioned_photo_dataset_urls.txt')))
+        return random.choice(list(open('../Data/SBU_captioned_photo_dataset_urls.txt')))
     else:
         return '-'
 
 
+# Generate a random timestamp from 2018 to 2020 in 'yyyy/mm/'dd hh:mm' format
 def produce_post_timestamp():
     year = random.randint(2018, 2020)
     month = random.randint(1, 12)
@@ -61,19 +66,24 @@ if __name__ == '__main__':
 
     with driver.session() as session:
         post_count = 0
+        # For 50 users... - TEST MODE
         for user in range(0, 50):
-            number_of_posts = random.randint(min_posts, mas_posts)
+            number_of_posts = random.randint(min_posts, mas_posts)  # ...generate a random number of posts
+
+            # For each post generate random information
             for post in range(0, number_of_posts + 1):
                 post_text = produce_post_text()
                 post_image = produce_post_image_url()
                 timestamp = produce_post_timestamp()
                 likes_count = random.randint(0, 67)
 
+                # Send query
                 session.write_transaction(create_post, user, post_count, post_text, post_image, timestamp, likes_count)
 
                 print(f'\rInserting post: {post} of user: {user} ({post_count + 1} total)', end="", flush=True)
 
                 '''
+                # Print generated information for debugging
                 print(f'user: {user}\n'
                       f'\tid: {post_count}\n'
                       f'\ttext: {post_text}\n'

@@ -138,15 +138,42 @@ else {
                                         <a href="timeline-photos.php?user='.$_GET['user'].'">Photos</a>
                                         <a href="timeline-friends.php?user='.$_GET['user'].'">Followers</a>
                                         <a href="about.php?user='.$_GET['user'].'">Info</a>
-                                    </li>
+                                    </li>';
+                                ?>
                                 </ul>
                             </div>
+                            <?php
+                            /* NOT EFFICIENT
+
+                            if ($_GET['user'] != $_COOKIE['user']) {
+                                $query = "MATCH (u:User) WHERE u.id = " . $_COOKIE["user"] . " \n
+                                    MATCH (u)-[:FOLLOWS]->(m:User) RETURN m"; // Get the users that logged-in user follows
+                                $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                                $count = 0;
+                                $cnt = 0;
+
+                                foreach ($result->getNodes() as $follows) {
+
+                                    $query = "MATCH (u:User) WHERE u.id = " . $follows->getProperty('id') . " \n
+                                    MATCH (m:User) WHERE m.id =".$_GET['user']." \n
+                                    MATCH (u)-[r:FOLLOWS]->(m) RETURN count(r) as rel"; // Get the relationship between user-follow and user of current profile
+                                    $result = $client->sendCypherQuery($query)->getResult(); // Execute query
+
+                                    if($result->get('rel') != 0) {
+                                        $count++;
+                                    }
+                                }
+                                echo "<span>".$count." of your follows, follow this user</span>";
+                            }
+                            */
+                            ?>
                         </div>
                     </div>
                 </div>
             </div>
-        </section><!-- top area -->';
-                                ?>
+        </section><!-- top area -->
+
 		
 	<section>
 		<div class="gap gray-bg">
