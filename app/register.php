@@ -46,7 +46,7 @@ if (isset($_POST["fullname"], $_POST["password"], $_POST["email"], $_POST["day"]
         $newId = (int)$newId + 1; // Calculate the id of the new user
 
         // Create the new user with all given information as properties
-        $query = "CREATE (u:User { id: " . $newId . ", fullname: '" . $_POST["fullname"] . "', email: '" . $_POST["email"] . "', gender: '" . $_POST["gender"] . "', birthDate: '" . $birthDate . "', password: '" . $hashed_pass . "', profileImageUrl: 'https://www.nailseatowncouncil.gov.uk/wp-content/uploads/blank-profile-picture-973460_1280.jpg'})";
+        $query = "CREATE (u:User { id: " . $newId . ", fullname: '" . $_POST["fullname"] . "', email: '" . $_POST["email"] . "', gender: '" . $_POST["gender"] . "', birthDate: '" . $birthDate . "', password: '" . $hashed_pass . "', profileImageUrl: 'https://github.com/p17griv/neobook/blob/main/app/images/blank-profile-picture.jpg'})";
         $client->sendCypherQuery($query); // Execute query
 
         setcookie("user", $newId, time() + (86400 * 30), "/"); // Set a cookie with the new user's id as value
