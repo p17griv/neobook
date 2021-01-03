@@ -225,7 +225,7 @@ else {
                                 $posts = $client->sendCypherQuery($query)->getResult(); // Execute query
 
                                 foreach ($posts->getNodes() as $post) {
-                                    $query = "MATCH (u)-[:UPLOADS]->(p:Post) WHERE p.id = ".$post->getProperty('id')." RETURN u.id, u.profileImageUrl, u.fullname"; // Get the user-owner of current post
+                                    $query = "MATCH (u)-[:UPLOADS]->(p:Post) WHERE ID(p) = ".$post->getId()." RETURN u.id, u.profileImageUrl, u.fullname"; // Get the user-owner of current post
                                     $postOwner = $client->sendCypherQuery($query)->getResult(); // Execute query
 
                                     echo '
