@@ -11,7 +11,7 @@
 
 ## [Data Sources](https://github.com/p17griv/neobook/wiki/Data-Sources)
 ## [Installation Guide](https://github.com/p17griv/neobook/wiki/Installation-Guide)
-## [App Functions & Cypher Queries](https://github.com/p17griv/neobook/wiki/App-Functionality-&-Cypher-Queries) 
+## [App Functions & Cypher Queries](https://github.com/p17griv/neobook/wiki/App-Functionality-&-Cypher-Queries)
 
 ### About [Neo4j](https://neo4j.com/)
 *Neo4j is a native graph database, built from the ground up to leverage not only data but also data relationships. Neo4j connects data as it’s stored, enabling queries never before imagined, at speeds never thought possible.*
@@ -35,4 +35,4 @@
 
 #### Database - Graph Schema:
 
-![Db Schema](https://github.com/p17griv/neobook/blob/main/db_schema.png)
+![Db Schema](https://github.com/p17griv/neobook/blob/main/imgs/db_schema.png)
