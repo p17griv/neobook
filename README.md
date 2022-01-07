@@ -1,5 +1,3 @@
-***
-
 ![](https://github.com/p17griv/neobook/blob/main/app/images/logo.png)
 
 # NeoBook
