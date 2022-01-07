@@ -9,6 +9,8 @@
 
 **NeoBook** is a student project for "Big Data" course of department of Informatics - Ionian University, made by [Pashalis Grivas](https://github.com/p17griv) and [George Gerarchakis](https://github.com/p17gera). The main goal of this project is to create a use case of [Neo4j Graph Platform](https://neo4j.com/) and demonstrate it's capabilities by building a simple Social Network Application - Website, **"NeoBook"**. Specifically, **200,000** nodes with ```User``` label and properties with dummy data and **2,360,494** relationships with  ```FOLLOWS``` label were created in order to prove Neo4j's capabilities.
 
+Finally, a comparison of Neo4j's performance was conducted by [executing 3 different queries](https://github.com/p17griv/neobook/blob/main/Performance%20Study/query.py) of various complexities on two different systems with NeoBook's dummy data. Study's results can be found in this [Report](https://docs.google.com/viewer?url=https://raw.githubusercontent.com/p17griv/neobook/main/Performance%20Study/Report.pdf) (Greek).
+
 ## [Data Sources](https://github.com/p17griv/neobook/wiki/Data-Sources)
 ## [Installation Guide](https://github.com/p17griv/neobook/wiki/Installation-Guide)
 ## [App Functions & Cypher Queries](https://github.com/p17griv/neobook/wiki/App-Functionality-&-Cypher-Queries)
